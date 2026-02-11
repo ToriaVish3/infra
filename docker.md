@@ -50,3 +50,29 @@ services:
 - `docker cp file web:/path/` — копировать файл в контейнер
 - `docker compose config` — проверить итоговую конфигурацию Compose
 - `docker compose pull` — скачать образы
+
+## Порядок настройки (как в задании)
+1. Установить Docker:
+   - `sudo apt update`
+   - `sudo apt install docker.io`
+2. Включить и запустить сервис:
+   - `sudo systemctl enable --now docker`
+3. Запустить контейнер nginx:
+   - `sudo docker run -d -p 80:80 --name web nginx`
+4. Проверка на самом web‑узле:
+   - `curl http://localhost`
+
+## Пояснения к параметрам команды run
+- `-d` — запуск в фоне (daemon).
+- `-p 80:80` — проброс порта: хост 80 → контейнер 80.
+- `--name web` — имя контейнера (чтобы удобно управлять).
+- `nginx` — образ (если нет локально, будет скачан).
+
+## Что где хранится
+- Образы: `/var/lib/docker/`
+- Контейнеры: `/var/lib/docker/containers/`
+- Логи контейнеров: `/var/lib/docker/containers/<id>/*-json.log`
+
+## Проверки
+- `docker ps` — контейнер запущен
+- `curl http://localhost` — отдаётся дефолтная страница nginx
