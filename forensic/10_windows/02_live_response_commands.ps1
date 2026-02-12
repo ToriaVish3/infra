@@ -1,13 +1,24 @@
-﻿# Windows Live Response Commands
+﻿# Windows live response commands
+Get-Date
+hostname
+whoami
 
-# Process and network triage
+# Processes
 Get-Process | Sort-Object CPU -Descending | Select-Object -First 30
-Get-NetTCPConnection | Sort-Object State,RemotePort
+Get-CimInstance Win32_Process | Select-Object ProcessId,ParentProcessId,Name,CommandLine
 
-# Persistence triage
+# Network
+Get-NetTCPConnection | Sort-Object State,RemoteAddress,RemotePort
+ipconfig /all
+arp -a
+
+# Persistence
 Get-ScheduledTask | Select-Object TaskName,TaskPath,State
 Get-CimInstance Win32_StartupCommand | Select-Object Name,Command,Location,User
+Get-Service | Where-Object {$_.StartType -eq "Automatic"} | Select-Object Name,DisplayName,Status
 
-# Logging and PowerShell traces
-Get-WinEvent -LogName Security -MaxEvents 200
-Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" -MaxEvents 200
+# Logs
+Get-WinEvent -LogName Security -MaxEvents 500
+Get-WinEvent -LogName System -MaxEvents 500
+Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" -MaxEvents 500
+Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" -MaxEvents 500 -ErrorAction SilentlyContinue

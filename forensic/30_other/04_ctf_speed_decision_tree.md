@@ -1,10 +1,13 @@
-﻿# 04 ctf speed decision tree
+﻿# 04_ctf_speed_decision_tree
 
-## Purpose
-Operational notes and quick forensic workflow for CTF/IR tasks.
+## Steps
+1. Identify evidence type and scope.
+2. Run minimal command set.
+3. Record findings in CSV templates.
 
-## Add
-- High-value artifacts
-- Exact commands
-- Common false positives
-- Time-saving checks
+## Commands
+```bash
+mkdir -p case
+printf "time_utc,source,event,details\n" > timeline.csv
+grep -RinE "flag\{|THM\{" . 2>/dev/null
+```

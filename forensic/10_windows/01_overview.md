@@ -1,20 +1,17 @@
-﻿# Overview (room-driven)
+﻿# 01_overview
 
-Эта папка собрана в первую очередь из практик TryHackMe:
-- Windows Forensics 1
-- KAPE
-- Redline
-- Memory Analysis Introduction
-- Linux File System Analysis
+## Steps
+1. Run host baseline commands.
+2. Extract high-value artifacts.
+3. Correlate events around incident time.
 
-## Что откуда
-- Артефакты Windows, реестр, EVTX, таймлайн: `Windows Forensics 1`
-- Сбор и первичный парсинг: `KAPE`
-- Host investigation и IOC-поиск: `Redline`
-- Базовый memory triage: `Memory Analysis Introduction`
-
-## Мини-порядок на задаче
-1. Быстрый triage хоста (процессы, сеть, автозапуск).
-2. Снять/собрать артефакты (KAPE или руками).
-3. Проверить execution + persistence + lateral traces.
-4. Собрать таймлайн и подтвердить гипотезу фактами.
+## Commands
+```powershell
+Get-Date
+hostname
+whoami
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 20
+Get-NetTCPConnection
+Get-WinEvent -LogName Security -MaxEvents 200
+Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" -MaxEvents 200
+```

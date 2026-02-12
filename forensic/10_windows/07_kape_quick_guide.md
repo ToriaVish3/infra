@@ -1,29 +1,17 @@
-﻿# KAPE quick guide (for CTF)
+﻿# 07_kape_quick_guide
 
-Основано на румке `TryHackMe KAPE`.
+## Steps
+1. Run host baseline commands.
+2. Extract high-value artifacts.
+3. Correlate events around incident time.
 
-## Что делать быстро
-1. Запустить triage-сбор по хосту.
-2. Сфокусироваться на артефактах execution/persistence/logs.
-3. Сразу выгрузить результаты в отдельную папку case.
-
-## Что забирать в первую очередь
-- Event Logs (Security/System/PowerShell/Sysmon)
-- Registry hives (SAM/SYSTEM/SOFTWARE/NTUSER.DAT/UsrClass.dat)
-- Prefetch
-- Amcache/Shimcache-related data
-- Jump Lists / LNK / Recent
-- Scheduled tasks / services traces
-- Browser artifacts
-
-## Базовая схема
-- Source: подозрительный хост/образ
-- Target profiles: triage-профили на системные артефакты
-- Modules: парсинг в удобный CSV/текст
-- Output: отдельная case-папка с timestamp
-
-## Что фиксировать в отчете
-- Что собирали (профиль/таргеты)
-- Время сбора
-- Путь до output
-- Ключевые находки (файл/ключ/лог/время)
+## Commands
+```powershell
+Get-Date
+hostname
+whoami
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 20
+Get-NetTCPConnection
+Get-WinEvent -LogName Security -MaxEvents 200
+Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" -MaxEvents 200
+```

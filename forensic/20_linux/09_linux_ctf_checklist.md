@@ -1,12 +1,17 @@
-﻿# Linux CTF checklist
+﻿# 09_linux_ctf_checklist
 
-1. Кто логинился и откуда (`auth.log`/`secure`/`journalctl`)?
-2. Были ли sudo/escalation события?
-3. Есть ли новые/чужие SSH ключи?
-4. Есть ли cron/systemd timer persistence?
-5. Какие подозрительные команды запускались из history/logs?
-6. Какие файлы изменялись во время инцидента?
-7. Есть ли SUID/SGID/capabilities аномалии?
-8. Были ли странные исходящие подключения/туннели?
-9. Какие артефакты подтверждают гипотезу минимум 2 источниками?
-10. Есть ли готовый timeline для финального ответа?
+## Steps
+1. Review auth and interactive activity.
+2. Check persistence and privileged binaries.
+3. Build quick timeline from logs/files.
+
+## Commands
+```bash
+date -u
+who; w; last -n 20
+ps aux --sort=-%cpu | head -n 20
+ss -tulpen
+sudo journalctl -n 200 --no-pager
+sudo find / -xdev -perm -4000 -type f 2>/dev/null
+sudo getcap -r / 2>/dev/null
+```

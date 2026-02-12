@@ -1,24 +1,13 @@
-﻿# Memory forensics (Volatility 3)
+﻿# 01_memory_forensics_volatility3
 
-Опирается на `TryHackMe Memory Analysis Introduction` + базовый практический минимум.
+## Steps
+1. Identify evidence type and scope.
+2. Run minimal command set.
+3. Record findings in CSV templates.
 
-## Быстрый старт
-1. Определи профиль/символы (если требуется).
-2. Построй список процессов и дерево.
-3. Проверь сетевые артефакты.
-4. Проверь CLI-артефакты и подозрительные DLL/handles.
-
-## Часто используемые плагины
-- `windows.pslist`
-- `windows.pstree`
-- `windows.cmdline`
-- `windows.netscan`
-- `windows.dlllist`
-- `windows.handles`
-- `windows.filescan`
-
-## Что искать
-- Процессы без нормального parent
-- Несоответствие image path и ожидаемого места запуска
-- Подозрительные сетевые соединения
-- Следы инжекта/аномальных модулей
+## Commands
+```bash
+mkdir -p case
+printf "time_utc,source,event,details\n" > timeline.csv
+grep -RinE "flag\{|THM\{" . 2>/dev/null
+```
