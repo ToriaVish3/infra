@@ -1,56 +1,29 @@
-﻿# Package and Binary Abuse Investigation
+﻿# Package и Binary Abuse
 
-## Package manager traces
-
-### Debian/Ubuntu/Kali
+### Команда
 ```bash
-sudo tail -n 300 /var/log/apt/history.log
-sudo tail -n 300 /var/log/dpkg.log
+tail -n 200 /var/log/apt/history.log
 ```
+Что делает: последние установки/обновления пакетов.
+Параметры: `-n 200` последние 200 строк.
 
-### RHEL-family
+### Команда
 ```bash
-sudo tail -n 300 /var/log/yum.log 2>/dev/null
-sudo dnf history 2>/dev/null
+file suspicious.bin
 ```
+Что делает: определяет тип подозрительного файла.
+Параметры: путь к файлу.
 
-## Suspicious binaries
-
-Commands:
+### Команда
 ```bash
-file /path/suspicious
-strings /path/suspicious | head -n 120
-sha256sum /path/suspicious
-ldd /path/suspicious 2>/dev/null
+strings suspicious.bin | head -n 100
 ```
+Что делает: извлекает строки из бинарника.
+Параметры: `head -n 100` ограничение вывода.
 
-## Abuse of permissions
-
-### SUID/SGID
+### Команда
 ```bash
-sudo find / -xdev -perm -4000 -type f 2>/dev/null
-sudo find / -xdev -perm -2000 -type f 2>/dev/null
+sha256sum suspicious.bin
 ```
-
-### Linux capabilities
-```bash
-sudo getcap -r / 2>/dev/null
-```
-
-Look for dangerous capabilities:
-- `cap_setuid`
-- `cap_setgid`
-- `cap_sys_admin`
-- `cap_dac_override`
-
-## Quick checks for masquerading
-```bash
-sudo find /tmp /var/tmp /dev/shm /usr/local/bin /opt -type f -executable 2>/dev/null | head -n 300
-sudo find / -xdev -type f -name '.*' 2>/dev/null | head -n 300
-```
-
-## Shared library hijack hints
-```bash
-env | grep -E '^LD_'
-sudo grep -RinE 'LD_PRELOAD|LD_LIBRARY_PATH' /etc /home /root 2>/dev/null | head -n 300
-```
+Что делает: хеш для IOC/сравнения.
+Параметры: путь к файлу.

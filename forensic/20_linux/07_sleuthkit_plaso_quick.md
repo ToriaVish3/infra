@@ -1,52 +1,29 @@
-﻿# Sleuth Kit + Plaso Quick Guide
+﻿# Sleuth Kit + Plaso
 
-## Sleuth Kit (disk image)
-
-1) Partition layout:
+### Команда
 ```bash
 mmls image.dd
 ```
+Что делает: показывает таблицу разделов образа.
+Параметры: путь к образу.
 
-2) File-system stats:
+### Команда
 ```bash
 fsstat -o <offset> image.dd
 ```
+Что делает: информация по файловой системе раздела.
+Параметры: `-o` смещение раздела.
 
-3) Recursive listing:
-```bash
-fls -r -o <offset> image.dd | head -n 200
-```
-
-4) Extract file by inode:
+### Команда
 ```bash
 icat -o <offset> image.dd <inode> > extracted.bin
-file extracted.bin
-sha256sum extracted.bin
 ```
+Что делает: извлекает файл по inode.
+Параметры: `-o` offset, `<inode>` номер inode.
 
-5) Timeline:
-```bash
-fls -r -m / -o <offset> image.dd > bodyfile.txt
-mactime -b bodyfile.txt > mactime.csv
-```
-
-## Plaso (log2timeline)
-
-1) Create super timeline:
+### Команда
 ```bash
 log2timeline.py --status_view none --storage-file timeline.plaso image.dd
 ```
-
-2) Convert to CSV:
-```bash
-psort.py -o l2tcsv -w timeline.csv timeline.plaso
-```
-
-3) Filter by keywords:
-```bash
-psort.py -o dynamic --slice "date > '2026-02-12T00:00:00'" timeline.plaso | grep -Ei 'ssh|sudo|cron|systemd|tmp|wget|curl'
-```
-
-## Practical tip
-- Use Sleuth Kit for targeted extraction and inode-level checks.
-- Use Plaso for broad timeline correlation across many artifact types.
+Что делает: строит Plaso-хранилище таймлайна.
+Параметры: `--storage-file` выходной файл.

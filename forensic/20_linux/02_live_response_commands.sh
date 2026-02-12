@@ -1,70 +1,52 @@
 ﻿#!/usr/bin/env bash
 set -euo pipefail
 
-# Linux live triage (read-mostly)
-
-echo "== Time/System =="
+# Показывает UTC-время для привязки таймлайна
 date -u
+# Показывает состояние времени и таймзону
 timedatectl || true
+# Показывает имя хоста
 hostname
-hostnamectl || true
-uname -a
+# Показывает ОС и версию
 cat /etc/os-release
 
-echo "== Users/Auth =="
-id
+# Текущие пользователи в системе
 who
+# Пользователи + активные команды
 w
-last -a | head -n 40
-lastb -a | head -n 40 || true
+# Успешные входы
+last -a | head -n 50
+# Неуспешные входы
+lastb -a | head -n 50 || true
 
-# Account and privilege checks
-getent passwd | head -n 80
-getent group | head -n 80
-awk -F: '$3 == 0 {print}' /etc/passwd
-sudo cat /etc/sudoers 2>/dev/null | sed -n '1,120p' || true
-sudo ls -la /etc/sudoers.d 2>/dev/null || true
-
-echo "== Processes/Network =="
+# Топ процессов по CPU
 ps aux --sort=-%cpu | head -n 40
-ps aux --sort=-%mem | head -n 40
+# Дерево процессов с PID и аргументами
 pstree -ap | head -n 120
+
+# Сокеты и порты
 ss -tulpen
+# Установленные TCP-соединения
 ss -tpn
-lsof -i -P -n | head -n 120
-ip a
-ip r
-arp -an || true
 
-echo "== Persistence =="
+# Cron текущего пользователя
 crontab -l || true
+# Системные cron-каталоги
 sudo ls -la /etc/cron.d /etc/cron.daily /etc/cron.hourly /etc/cron.weekly /var/spool/cron 2>/dev/null || true
+
+# Все systemd timers
 systemctl list-timers --all
+# Включенные сервисы
 systemctl list-unit-files --type=service | grep enabled || true
-sudo find /etc/systemd/system /usr/lib/systemd/system -type f -name '*.service' 2>/dev/null | head -n 200
 
-echo "== SSH =="
-sudo grep -Ei 'PermitRootLogin|PasswordAuthentication|PubkeyAuthentication|AuthorizedKeysFile' /etc/ssh/sshd_config 2>/dev/null || true
-sudo find /home /root -type f -name authorized_keys -exec ls -la {} \; 2>/dev/null || true
-
-echo "== Logs =="
+# Последние записи журнала
 sudo journalctl -n 300 --no-pager
-sudo journalctl -u ssh --since '-12h' --no-pager 2>/dev/null || true
-sudo grep -Ei 'failed|invalid user|accepted|sudo|session opened|session closed' /var/log/auth.log 2>/dev/null | tail -n 300 || true
-sudo grep -Ei 'failed|invalid user|accepted|sudo|session opened|session closed' /var/log/secure 2>/dev/null | tail -n 300 || true
-sudo ausearch -ts recent -m USER_LOGIN,USER_AUTH,CRED_ACQ 2>/dev/null | tail -n 200 || true
+# Фильтр auth событий (Debian/Kali)
+sudo grep -Ei 'failed|invalid user|accepted|sudo|session' /var/log/auth.log 2>/dev/null | tail -n 300 || true
 
-echo "== Filesystem hotspots =="
-sudo find /tmp /var/tmp /dev/shm -type f -mmin -360 2>/dev/null | head -n 300
-sudo find /home /root -xdev -type f -mtime -2 2>/dev/null | head -n 300
-sudo find / -xdev -perm -4000 -type f 2>/dev/null | head -n 300
-sudo getcap -r / 2>/dev/null | head -n 300
-
-echo "== Package history =="
-sudo tail -n 200 /var/log/apt/history.log 2>/dev/null || true
-sudo tail -n 200 /var/log/dpkg.log 2>/dev/null || true
-sudo tail -n 200 /var/log/yum.log 2>/dev/null || true
-sudo dnf history 2>/dev/null || true
-
-echo "== Quick flag scan =="
-sudo grep -RinE 'flag\{|thm\{|ctf\{' /home /root /opt /var/www 2>/dev/null | head -n 200 || true
+# Подозрительные новые файлы во временных папках
+sudo find /tmp /var/tmp /dev/shm -type f -mmin -360 2>/dev/null | head -n 200
+# SUID-файлы
+sudo find / -xdev -perm -4000 -type f 2>/dev/null | head -n 200
+# Capabilities у файлов
+sudo getcap -r / 2>/dev/null | head -n 200

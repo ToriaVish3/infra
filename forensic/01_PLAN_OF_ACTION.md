@@ -1,90 +1,146 @@
-﻿# Forensics Plan of Action (Linux + Astra Linux)
+﻿# План Действий (Linux + Astra Linux)
 
-## Track A: Generic Linux (competition mode)
+## Этап 1. Базовая фиксация
 
-### Step 1: Start and context
+### Команда
 ```bash
-mkdir -p case && cd case
-script -a session.log
 date -u
-timedatectl
-hostnamectl
 ```
+Что делает: фиксирует текущее UTC-время для таймлайна.
+Параметры: `-u` - вывести время в UTC.
 
-### Step 2: Auth and users
+### Команда
+```bash
+timedatectl
+```
+Что делает: показывает таймзону и синхронизацию времени.
+Параметры: без параметров - общий статус времени.
+
+### Команда
+```bash
+script -a session.log
+```
+Что делает: пишет всю сессию терминала в лог.
+Параметры: `-a` - дописывать в файл, а не перезаписывать.
+
+## Этап 2. Кто входил и что делал
+
+### Команда
 ```bash
 who
+```
+Что делает: показывает текущие интерактивные сессии.
+Параметры: без параметров - активные логины.
+
+### Команда
+```bash
 w
-last -a | head -n 80
-lastb -a | head -n 80
-id
-cat /etc/passwd
-cat /etc/group
 ```
+Что делает: показывает пользователей и их текущие процессы.
+Параметры: без параметров - краткий обзор активности.
 
-### Step 3: Process and network
+### Команда
 ```bash
-ps aux --sort=-%cpu | head -n 50
-pstree -ap | head -n 150
+last -a | head -n 50
+```
+Что делает: показывает последние успешные входы.
+Параметры: `-a` - IP/хост в конце строки; `head -n 50` - первые 50 строк.
+
+### Команда
+```bash
+lastb -a | head -n 50
+```
+Что делает: показывает последние неуспешные входы.
+Параметры: `-a` - IP/хост; `head -n 50` - ограничение вывода.
+
+## Этап 3. Процессы и сеть
+
+### Команда
+```bash
+ps aux --sort=-%cpu | head -n 40
+```
+Что делает: выводит самые CPU-нагруженные процессы.
+Параметры: `a` - все пользователи, `u` - владелец/CPU/MEM, `x` - без TTY, `--sort=-%cpu` - сортировка по CPU.
+
+### Команда
+```bash
+pstree -ap | head -n 120
+```
+Что делает: дерево процессов для поиска parent-child аномалий.
+Параметры: `-a` - аргументы командной строки, `-p` - PID.
+
+### Команда
+```bash
 ss -tulpen
-lsof -i -P -n | head -n 150
 ```
+Что делает: показывает сетевые сокеты и привязанные процессы.
+Параметры: `-t` TCP, `-u` UDP, `-l` listening, `-p` process, `-e` extra, `-n` numeric.
 
-### Step 4: Persistence and escalation
+## Этап 4. Persistence
+
+### Команда
 ```bash
-crontab -l || true
+crontab -l
+```
+Что делает: показывает cron-задачи текущего пользователя.
+Параметры: `-l` - листинг задач.
+
+### Команда
+```bash
 systemctl list-timers --all
+```
+Что делает: показывает все systemd timers (включая неактивные).
+Параметры: `--all` - полный список.
+
+### Команда
+```bash
 systemctl list-unit-files --type=service | grep enabled
-sudo find / -xdev -perm -4000 -type f 2>/dev/null
-sudo getcap -r / 2>/dev/null
 ```
+Что делает: показывает включенные сервисы systemd.
+Параметры: `--type=service` - только сервисы.
 
-### Step 5: Logs and timeline
+## Этап 5. Файлы и повышение привилегий
+
+### Команда
 ```bash
-sudo journalctl -n 500 --no-pager
-sudo grep -Ei 'failed|invalid user|accepted|sudo|session' /var/log/auth.log 2>/dev/null | tail -n 500
-sudo find /home /root /tmp /var/tmp -xdev -type f -printf '%TY-%Tm-%Td %TH:%TM:%TS %u %g %m %p\n' | sort > timeline_files.txt
+find /tmp /var/tmp /dev/shm -type f -mmin -360 2>/dev/null
 ```
+Что делает: ищет файлы, измененные за последние 6 часов в временных папках.
+Параметры: `-type f` - файлы, `-mmin -360` - младше 360 минут.
 
-### Step 6: Flags and final answer
+### Команда
 ```bash
-sudo grep -RinE 'flag\{|thm\{|ctf\{' /home /root /opt /var/www 2>/dev/null | head -n 200
+find / -xdev -perm -4000 -type f 2>/dev/null
 ```
+Что делает: ищет SUID-файлы.
+Параметры: `-xdev` - не выходить за текущую ФС, `-perm -4000` - SUID бит установлен.
 
-## Track B: Astra Linux detailed extension
-
-### Step 1: Verify Astra-specific security state
+### Команда
 ```bash
-sudo astra-mic-control status
-sudo pdpl-user $(whoami)
-usercaps -M
-usercaps $(whoami)
+getcap -r / 2>/dev/null
 ```
+Что делает: ищет Linux capabilities у файлов.
+Параметры: `-r` - рекурсивно.
 
-### Step 2: Mandatory label checks on critical paths
+## Этап 6. Astra Linux дополнительно
+
+### Команда
 ```bash
-sudo pdpl-file /etc
-sudo pdpl-file /etc/ssh
-sudo pdpl-file /var/log
-sudo pdpl-file /home
-sudo pdpl-file /root
+astra-mic-control status
 ```
+Что делает: показывает статус мандатного контроля целостности (MIC).
+Параметры: `status` - вывод текущего состояния.
 
-### Step 3: Compare user integrity and role expectation
+### Команда
 ```bash
-id
-groups
-getent group astra-admin
-sudo pdpl-user root
-sudo pdpl-user <suspected_user>
+pdpl-user <user>
 ```
+Что делает: показывает метки/уровни для пользователя.
+Параметры: `<user>` - интересующий аккаунт.
 
-### Step 4: Then run full generic Linux track
-Use all commands from Track A and correlate with Astra labels/integrity outputs.
-
-### Step 5: Reporting notes for Astra
-Include:
-- `astra-mic-control status`
-- `pdpl-user` output for relevant accounts
-- `pdpl-file` output for touched sensitive paths
-- exact command and timestamp of each finding
+### Команда
+```bash
+pdpl-file /etc/ssh
+```
+Что делает: показывает метки/уровни для объекта ФС.
+Параметры: путь к файлу/каталогу.
