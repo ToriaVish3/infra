@@ -1,17 +1,52 @@
-﻿# 07_sleuthkit_plaso_quick
+﻿# Sleuth Kit + Plaso Quick Guide
 
-## Steps
-1. Review auth and interactive activity.
-2. Check persistence and privileged binaries.
-3. Build quick timeline from logs/files.
+## Sleuth Kit (disk image)
 
-## Commands
+1) Partition layout:
 ```bash
-date -u
-who; w; last -n 20
-ps aux --sort=-%cpu | head -n 20
-ss -tulpen
-sudo journalctl -n 200 --no-pager
-sudo find / -xdev -perm -4000 -type f 2>/dev/null
-sudo getcap -r / 2>/dev/null
+mmls image.dd
 ```
+
+2) File-system stats:
+```bash
+fsstat -o <offset> image.dd
+```
+
+3) Recursive listing:
+```bash
+fls -r -o <offset> image.dd | head -n 200
+```
+
+4) Extract file by inode:
+```bash
+icat -o <offset> image.dd <inode> > extracted.bin
+file extracted.bin
+sha256sum extracted.bin
+```
+
+5) Timeline:
+```bash
+fls -r -m / -o <offset> image.dd > bodyfile.txt
+mactime -b bodyfile.txt > mactime.csv
+```
+
+## Plaso (log2timeline)
+
+1) Create super timeline:
+```bash
+log2timeline.py --status_view none --storage-file timeline.plaso image.dd
+```
+
+2) Convert to CSV:
+```bash
+psort.py -o l2tcsv -w timeline.csv timeline.plaso
+```
+
+3) Filter by keywords:
+```bash
+psort.py -o dynamic --slice "date > '2026-02-12T00:00:00'" timeline.plaso | grep -Ei 'ssh|sudo|cron|systemd|tmp|wget|curl'
+```
+
+## Practical tip
+- Use Sleuth Kit for targeted extraction and inode-level checks.
+- Use Plaso for broad timeline correlation across many artifact types.

@@ -254,3 +254,19 @@ dnf history 2>/dev/null
 ```bash
 script -a investigator_session.log
 ```
+
+## Astra Linux specifics (quick)
+
+Astra Linux SE adds PARSEC MAC/MIC controls. Useful checks:
+```bash
+sudo pdpl-user <username>
+sudo pdpl-file /path/to/object
+sudo astra-mic-control status
+usercaps -M
+usercaps <username>
+```
+
+What to verify:
+- User integrity label and its expected level.
+- File/dir mandatory labels in sensitive paths.
+- PARSEC privileges granted to non-admin accounts.

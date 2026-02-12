@@ -1,56 +1,90 @@
-﻿# Plan of Action (with commands)
+﻿# Forensics Plan of Action (Linux + Astra Linux)
 
-## 1. Start (first 3 minutes)
-1. Create workspace and capture time.
+## Track A: Generic Linux (competition mode)
+
+### Step 1: Start and context
 ```bash
 mkdir -p case && cd case
+script -a session.log
 date -u
-```
-2. Create tracking files.
-```bash
-touch findings.txt timeline.txt
+timedatectl
+hostnamectl
 ```
 
-## 2. Windows sequence
-```powershell
-Get-Date
-hostname
-whoami
-Get-Process | Sort-Object CPU -Descending | Select-Object -First 30
-Get-NetTCPConnection | Sort-Object State,RemotePort
-Get-ScheduledTask | Select-Object TaskName,TaskPath,State
-Get-CimInstance Win32_StartupCommand | Select-Object Name,Command,Location,User
-Get-WinEvent -LogName Security -MaxEvents 500
-Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" -MaxEvents 500
-Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" -MaxEvents 500 -ErrorAction SilentlyContinue
+### Step 2: Auth and users
+```bash
+who
+w
+last -a | head -n 80
+lastb -a | head -n 80
+id
+cat /etc/passwd
+cat /etc/group
 ```
 
-## 3. Linux sequence
+### Step 3: Process and network
 ```bash
-date -u
-who; w; last -n 20
-ps aux --sort=-%cpu | head -n 30
+ps aux --sort=-%cpu | head -n 50
+pstree -ap | head -n 150
 ss -tulpen
-crontab -l
+lsof -i -P -n | head -n 150
+```
+
+### Step 4: Persistence and escalation
+```bash
+crontab -l || true
 systemctl list-timers --all
 systemctl list-unit-files --type=service | grep enabled
-sudo journalctl -n 300 --no-pager
-sudo grep -Ei "failed|invalid user|accepted|sudo|session" /var/log/auth.log 2>/dev/null | tail -n 200
-sudo find /tmp /var/tmp /dev/shm -type f -mmin -180 2>/dev/null
 sudo find / -xdev -perm -4000 -type f 2>/dev/null
+sudo getcap -r / 2>/dev/null
 ```
 
-## 4. Memory sequence
+### Step 5: Logs and timeline
 ```bash
-python vol.py -f mem.raw windows.pslist
-python vol.py -f mem.raw windows.pstree
-python vol.py -f mem.raw windows.cmdline
-python vol.py -f mem.raw windows.netscan
+sudo journalctl -n 500 --no-pager
+sudo grep -Ei 'failed|invalid user|accepted|sudo|session' /var/log/auth.log 2>/dev/null | tail -n 500
+sudo find /home /root /tmp /var/tmp -xdev -type f -printf '%TY-%Tm-%Td %TH:%TM:%TS %u %g %m %p\n' | sort > timeline_files.txt
 ```
 
-## 5. Final submit check
+### Step 6: Flags and final answer
 ```bash
-grep -RinE "flag\{|THM\{" . 2>/dev/null
+sudo grep -RinE 'flag\{|thm\{|ctf\{' /home /root /opt /var/www 2>/dev/null | head -n 200
 ```
-- Confirm timezone.
-- Confirm answer by at least two artifacts.
+
+## Track B: Astra Linux detailed extension
+
+### Step 1: Verify Astra-specific security state
+```bash
+sudo astra-mic-control status
+sudo pdpl-user $(whoami)
+usercaps -M
+usercaps $(whoami)
+```
+
+### Step 2: Mandatory label checks on critical paths
+```bash
+sudo pdpl-file /etc
+sudo pdpl-file /etc/ssh
+sudo pdpl-file /var/log
+sudo pdpl-file /home
+sudo pdpl-file /root
+```
+
+### Step 3: Compare user integrity and role expectation
+```bash
+id
+groups
+getent group astra-admin
+sudo pdpl-user root
+sudo pdpl-user <suspected_user>
+```
+
+### Step 4: Then run full generic Linux track
+Use all commands from Track A and correlate with Astra labels/integrity outputs.
+
+### Step 5: Reporting notes for Astra
+Include:
+- `astra-mic-control status`
+- `pdpl-user` output for relevant accounts
+- `pdpl-file` output for touched sensitive paths
+- exact command and timestamp of each finding
