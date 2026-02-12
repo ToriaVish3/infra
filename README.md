@@ -1,43 +1,19 @@
-﻿# Инфра: общий список файлов и ссылок
+﻿# Forensic Pack
 
-Порядок: сначала то, что точно было в задании (сети, контейнеризация, веб, домен, мониторинг, VPN), затем по вероятности появления.
+Этот репозиторий дополнен паком материалов для соревнований по форензике.
 
-## 1) Точно в задании
-- [Сети и маршрутизация](networking.md) — IP, маршруты, диагностика, базовые команды. Когда нужно настроить L2/L3 и проверить доступность.
-- [Контейнеризация](docker.md) — Docker/Compose, команды, примеры. Когда сервис нужно поднять в контейнере.
-- [Веб‑технологии](nginx.md) — reverse proxy, HTTPS, команды. Когда нужен web‑шлюз/прокси.
-- [WAF (SafeLine)](safeline-waf.md) — базовая настройка WAF. Когда нужен web‑экранирующий слой.
-- [Домен (Samba AD)](samba-ad.md) — контроллер домена, команды и проверки. Когда требуется AD‑подобный домен.
-- [Домен (FreeIPA)](freeipa.md) — LDAP/FreeIPA, команды и шаги. Когда нужен Linux‑домен/LDAP.
-- [Мониторинг](monitoring.md) — Prometheus/Grafana, конфиги и команды. Когда нужно собрать метрики.
-- [VPN WireGuard](wireguard.md) — ключи, wg‑quick, минимальный конфиг. Когда требуется VPN‑доступ.
+## Где материалы
+- [forensic/README.md](./forensic/README.md)
+- [forensic/01_PLAN_OF_ACTION.md](./forensic/01_PLAN_OF_ACTION.md)
+- [forensic/00_INDEX.md](./forensic/00_INDEX.md)
 
-## 2) Очень вероятно
-- [Firewall/NAT](nftables.md) — фильтрация и NAT. Когда нужно закрыть доступ и/или сделать маскарадинг.
-- [Логи/диагностика](logging.md) — journalctl, logrotate. Когда нужен поиск ошибок и ротация логов.
-- [systemd](systemd.md) — управление сервисами. Когда нужно запускать/включать/проверять сервисы.
-- [Бэкапы](backups.md) — rsync/ssh/cron. Когда нужно настроить копирование конфигов.
+## Разделы
+- Windows: `forensic/10_windows/`
+- Linux: `forensic/20_linux/`
+- Other (memory/timeline/reporting): `forensic/30_other/`
 
-## 3) Вероятно
-- [DNS (BIND9)](dns.md) — зоны, named-check*, проверки dig. Когда нужен DNS‑сервер.
-- [DHCP (dnsmasq)](dhcp.md) — DHCP диапазон и опции. Когда нужна раздача адресов.
-- [NTP/время](ntp-chrony.md) — chrony, синхронизация. Когда нужно корректное время.
-- [FRR/OSPF](frr-ospf.md) — динамическая маршрутизация. Когда есть требование динамики.
-- [BGP](bgp.md) — eBGP/iBGP, фильтрация и проверки. Когда нужна междоменная маршрутизация.
-
-## 4) Может встретиться
-- [Split DNS (BIND views)](bind-views.md) — внутренние/внешние зоны. Когда нужен разный DNS для разных сетей.
-- [OpenLDAP](openldap.md) — slapd, ldapsearch/ldapadd. Когда нужен LDAP без IPA.
-- [Kerberos](kerberos.md) — KDC, kadmin, kinit. Когда нужна централизованная аутентификация.
-- [Proxmox](proxmox.md) — управление ВМ/CT и сетью. Когда надо управлять стендом.
-- [iptables legacy](iptables-legacy.md) — переключение nft/legacy. Когда попадается iptables‑конфиг.
-
-## 5) Реже (но иногда дают)
-- [OpenVPN](openvpn.md) — PKI и серверный конфиг. Когда VPN не WireGuard.
-- [Squid](squid.md) — базовая настройка прокси. Когда нужен HTTP‑прокси.
-- [HAProxy](haproxy.md) — reverse proxy/load balancing. Когда нужен балансировщик.
-- [Keepalived](keepalived.md) — VRRP/virtual IP. Когда нужен плавающий IP.
-- [GlusterFS](glusterfs.md) — репликация томов. Когда нужно распределённое хранилище.
-
-## Дополнительно
-- [Пошаговые инструкции/варианты](instructions.md) — пошаговые планы и альтернативы для выполнения практики.
+## Быстрый старт
+1. Открой `forensic/00_INDEX.md`.
+2. Выбери тип задачи.
+3. Иди в checklist + commands нужной платформы.
+4. Фиксируй находки в CSV-шаблоны.
