@@ -11,3 +11,4 @@ mkdir -p case
 printf "time_utc,source,event,details\n" > timeline.csv
 grep -RinE "flag\{|THM\{" . 2>/dev/null
 ```
+
