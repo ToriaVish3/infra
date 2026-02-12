@@ -17,6 +17,7 @@
 - [20_linux/08_package_and_binary_abuse.md](./20_linux/08_package_and_binary_abuse.md)
 - [20_linux/09_linux_ctf_checklist.md](./20_linux/09_linux_ctf_checklist.md)
 - [20_linux/10_linux_forensics_paths_and_commands.md](./20_linux/10_linux_forensics_paths_and_commands.md)
+- [20_linux/11_linux_directories_and_artifacts_map.md](./20_linux/11_linux_directories_and_artifacts_map.md)
 
 ## Other
 - [30_other/01_memory_forensics_volatility3.md](./30_other/01_memory_forensics_volatility3.md)
@@ -29,4 +30,5 @@
 - [30_other/08_findings_table_template.csv](./30_other/08_findings_table_template.csv)
 - [30_other/09_timeline_template.csv](./30_other/09_timeline_template.csv)
 - [30_other/10_official_sources_links.md](./30_other/10_official_sources_links.md)
+
 
