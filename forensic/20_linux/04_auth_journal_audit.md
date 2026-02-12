@@ -1,22 +1,53 @@
-﻿# Auth, Journal, Audit - с пояснениями
+﻿# 04 auth journal audit
 
-### Команда
-```bash
-journalctl -u ssh --since '-24h' --no-pager
-```
-Что делает: выводит ssh-логи за 24 часа.
-Параметры: `-u ssh` сервис, `--since` время начала, `--no-pager` без less.
+## Core logs
+- Debian/Ubuntu: `/var/log/auth.log`
+- RHEL/CentOS: `/var/log/secure`
+- Systemd journal: `journalctl`
+- Optional: `/var/log/audit/audit.log`
 
-### Команда
+## Baseline triage
 ```bash
-grep -Ei 'failed|invalid user|accepted|sudo' /var/log/auth.log
+sudo journalctl -n 300 --no-pager
+# Последние 300 записей journal
+sudo grep -Ei "failed|invalid user|accepted|sudo|session" /var/log/auth.log 2>/dev/null | tail -n 200
+# Фильтр auth-событий: failed/accepted/sudo/session
+last
+# История успешных входов
+lastlog
+# Информация о последнем входе каждого пользователя
+who
+# Кто сейчас в системе
 ```
-Что делает: фильтрует ключевые auth-события.
-Параметры: `-E` расширенный regex, `-i` без регистра.
 
-### Команда
+## Extra deep-dive
 ```bash
-ausearch -ts recent -m USER_LOGIN,USER_AUTH,CRED_ACQ
+sudo journalctl --since "2026-02-11 00:00:00" --until "2026-02-11 23:59:59" --no-pager
+# Journal за точное окно времени
+sudo journalctl _COMM=sshd --since "-24h" --no-pager
+# Только sshd события за 24 часа
+sudo grep -RInE "sudo|su:|session opened|session closed" /var/log 2>/dev/null | tail -n 200
+# Корреляция sudo/su/session по всем логам
+sudo lastb -a | head -n 50
+# Неуспешные логины
+sudo ausearch -m USER_LOGIN,USER_AUTH,USER_ACCT -ts recent 2>/dev/null
+# Auditd события аутентификации (если auditd есть)
 ```
-Что делает: ищет в auditd события входа и аутентификации.
-Параметры: `-ts recent` недавнее время, `-m` типы событий.
+
+## Users/groups checks from THM
+```bash
+cat /etc/passwd
+# Пользователи и UID/GID/shell
+cat /etc/passwd | cut -d: -f1,3 | grep ':0$'
+# Поиск аккаунтов с UID 0
+cat /etc/group
+# Локальные группы
+groups investigator
+# Группы конкретного пользователя
+getent group adm
+# Детали группы adm
+getent group 27
+# Детали группы по GID
+sudo cat /etc/sudoers
+# Правила sudo
+```

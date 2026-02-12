@@ -1,29 +1,29 @@
-﻿# Sleuth Kit + Plaso
+﻿# 07 sleuthkit plaso quick
 
-### Команда
-```bash
-mmls image.dd
-```
-Что делает: показывает таблицу разделов образа.
-Параметры: путь к образу.
+## Live-response first (room-aligned)
+- Сначала сделай live triage и собери `stat`, `find`, `journalctl`, `auth`.
+- Потом переходи к офлайн артефактам через образ диска.
 
-### Команда
+## Sleuth Kit quick
 ```bash
-fsstat -o <offset> image.dd
+fls -r -m / image.dd > bodyfile.txt
+# Сформировать bodyfile из всех артефактов образа
+mactime -b bodyfile.txt -d > timeline.csv
+# Построить MACB timeline в CSV
+icat image.dd <inode> > recovered.bin
+# Извлечь файл по inode
 ```
-Что делает: информация по файловой системе раздела.
-Параметры: `-o` смещение раздела.
 
-### Команда
+## Plaso quick
 ```bash
-icat -o <offset> image.dd <inode> > extracted.bin
+log2timeline.py --storage-file timeline.plaso image.dd
+# Собрать plaso-хранилище из образа
+psort.py -o l2tcsv -w plaso_timeline.csv timeline.plaso
+# Экспорт plaso в CSV
+psort.py -o dynamic --status_view none timeline.plaso "date > '2026-02-12'"
+# Фильтр вывода по времени
 ```
-Что делает: извлекает файл по inode.
-Параметры: `-o` offset, `<inode>` номер inode.
 
-### Команда
-```bash
-log2timeline.py --status_view none --storage-file timeline.plaso image.dd
-```
-Что делает: строит Plaso-хранилище таймлайна.
-Параметры: `--storage-file` выходной файл.
+## Correlation hints
+- Сопоставляй `ctime/mtime/atime` из `stat` с auth/web logs.
+- Подтверждай гипотезу минимум 2 источниками.

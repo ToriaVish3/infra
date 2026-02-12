@@ -1,13 +1,10 @@
-﻿# 10_official_sources_links
+﻿# Official DFIR Sources
 
-## Steps
-1. Identify evidence type and scope.
-2. Run minimal command set.
-3. Record findings in CSV templates.
-
-## Commands
-```bash
-mkdir -p case
-printf "time_utc,source,event,details\n" > timeline.csv
-grep -RinE "flag\{|THM\{" . 2>/dev/null
-```
+- NIST SP 800-86: https://csrc.nist.gov/pubs/sp/800/86/final
+- Microsoft Security Auditing 4688: https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4688
+- Sysmon (Sysinternals): https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon
+- Volatility 3 docs: https://volatility3.readthedocs.io/en/latest/
+- Sleuth Kit docs: https://www.sleuthkit.org/sleuthkit/man/
+- Plaso docs: https://plaso.readthedocs.io/en/latest/
+- Sigma spec: https://sigmahq.io/sigma-specification/specification/sigma-rules-specification.html
+- Red Hat audit docs: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/security_hardening/auditing-the-system_security-hardening

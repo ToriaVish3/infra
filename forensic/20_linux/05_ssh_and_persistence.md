@@ -1,29 +1,41 @@
-﻿# SSH и Persistence - команды с расшифровкой
+﻿# 05 ssh and persistence
 
-### Команда
+## SSH artefacts from THM flow
 ```bash
-find /home /root -type f -name authorized_keys -exec ls -la {} \; 2>/dev/null
+ls -a /home/jane
+# Показать скрытые файлы в home
+ls -al /home/jane/.ssh
+# Проверить права и содержимое .ssh
+cat /home/jane/.ssh/authorized_keys
+# Проверить authorized_keys
+stat /home/jane/.ssh/authorized_keys
+# Полные таймстемпы и inode для authorized_keys
+ls -al /home/jane/.ssh/authorized_keys
+# Права доступа к authorized_keys
 ```
-Что делает: находит все `authorized_keys` и показывает их метаданные.
-Параметры: `-type f` файлы, `-name` имя, `-exec ... \;` команда на каждый файл.
 
-### Команда
+## Persistence checks
 ```bash
 crontab -l
-```
-Что делает: показывает cron текущего пользователя.
-Параметры: `-l` list.
-
-### Команда
-```bash
+# Cron текущего пользователя
+sudo ls -la /etc/cron.d /etc/cron.daily /etc/cron.hourly /var/spool/cron 2>/dev/null
+# Системные cron директории
 systemctl list-timers --all
+# Все systemd timers
+systemctl list-unit-files --type=service | grep enabled
+# Список enabled сервисов
 ```
-Что делает: показывает все таймеры systemd.
-Параметры: `--all` включая неактивные.
 
-### Команда
+## Extra forensic commands
 ```bash
-grep -RinE 'curl|wget|bash -c|python -c|/tmp/' /etc/cron* /etc/systemd/system 2>/dev/null
+sudo grep -Ei "PermitRootLogin|PasswordAuthentication|PubkeyAuthentication|AuthorizedKeysFile" /etc/ssh/sshd_config
+# Ключевые SSH security-настройки
+sudo find /home /root -maxdepth 3 -type f -name 'authorized_keys' -exec ls -la {} \;
+# Найти все authorized_keys и их права
+sudo find /home /root -maxdepth 3 -type f -name 'authorized_keys' -exec stat {} \;
+# Полный stat для каждого authorized_keys
+sudo find /etc/systemd/system /usr/lib/systemd/system -type f -name '*.service' -mtime -7 -print
+# Новые/измененные systemd service файлы за 7 дней
+sudo systemctl cat ssh 2>/dev/null
+# Показать итоговый unit-файл ssh
 ```
-Что делает: ищет подозрительные команды в cron/systemd.
-Параметры: `-R` рекурсивно, `-n` номер строки, `-E` regex.

@@ -1,13 +1,10 @@
-﻿# 03_sigma_yara_ioc_templates
+﻿# 03 sigma yara ioc templates
 
-## Steps
-1. Identify evidence type and scope.
-2. Run minimal command set.
-3. Record findings in CSV templates.
+## Purpose
+Operational notes and quick forensic workflow for CTF/IR tasks.
 
-## Commands
-```bash
-mkdir -p case
-printf "time_utc,source,event,details\n" > timeline.csv
-grep -RinE "flag\{|THM\{" . 2>/dev/null
-```
+## Add
+- High-value artifacts
+- Exact commands
+- Common false positives
+- Time-saving checks
